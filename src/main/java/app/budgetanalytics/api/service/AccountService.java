@@ -25,11 +25,13 @@ public class AccountService {
         return this.accountRepository.findAllByUserId(userId);
     }
 
+    @Transactional
     public Account save(CreateAccountDto dto, String userId) {
         Account account = AccountMapper.toEntity(dto, userId);
         return this.accountRepository.save(account);
     }
 
+    @Transactional
     public Account updateAccount(UpdateAccountDto dto, String userId) {
         // check user is writing on his own content
         Account account = this.getOwnedAccountOrThrow(dto.getId(), userId);
