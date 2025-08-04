@@ -10,9 +10,13 @@ import app.budgetanalytics.api.mapper.TransactionMapper;
 import app.budgetanalytics.api.repository.AccountRepository;
 import app.budgetanalytics.api.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Date;
 
 @Service
 public class TransactionService {
@@ -25,6 +29,12 @@ public class TransactionService {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.verifyOwnershipHelper = verifyOwnershipHelper;
+    }
+
+    @Transactional
+    public Page<Transaction> getTransactions(Date startDate, Date endDate, String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
+        return this.transactionRepository.findByDateBetweenAndUserId(startDate, endDate, userId, pageable);
     }
 
     @Transactional
