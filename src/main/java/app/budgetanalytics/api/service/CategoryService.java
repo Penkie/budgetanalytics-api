@@ -3,6 +3,7 @@ package app.budgetanalytics.api.service;
 import app.budgetanalytics.api.dto.CreateCategoryDto;
 import app.budgetanalytics.api.dto.UpdateCategoryDto;
 import app.budgetanalytics.api.entity.Category;
+import app.budgetanalytics.api.helper.VerifyOwnershipHelper;
 import app.budgetanalytics.api.mapper.CategoryMapper;
 import app.budgetanalytics.api.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
@@ -16,9 +17,11 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final VerifyOwnershipHelper verifyOwnershipHelper;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, VerifyOwnershipHelper verifyOwnershipHelper) {
         this.categoryRepository = categoryRepository;
+        this.verifyOwnershipHelper = verifyOwnershipHelper;
     }
 
     public List<Category> findCategories(String userId) {
@@ -34,24 +37,14 @@ public class CategoryService {
     @Transactional
     public Category updateCategory(UpdateCategoryDto dto, String userId) {
         // check user is writing on his own content
-        Category category = this.getOwnedCategoryOrThrow(dto.getId(), userId);
+        Category category = this.verifyOwnershipHelper.getOwnedCategoryOrThrow(dto.getId(), userId);
         CategoryMapper.updateEntityValues(dto, category);
         return this.categoryRepository.save(category);
     }
 
     @Transactional
     public void deleteCategory(String id, String userId) {
-        Category category = this.getOwnedCategoryOrThrow(id, userId);
+        Category category = this.verifyOwnershipHelper.getOwnedCategoryOrThrow(id, userId);
         this.categoryRepository.deleteById(category.getId());
-    }
-
-    private Category getOwnedCategoryOrThrow(String id, String userId) {
-        Category category = this.categoryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
-
-        if (!category.getUserId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have access to this resource or it doesn't exist.");
-        }
-
-        return category;
     }
 }

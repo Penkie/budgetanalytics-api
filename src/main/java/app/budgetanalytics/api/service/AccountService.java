@@ -3,6 +3,7 @@ package app.budgetanalytics.api.service;
 import app.budgetanalytics.api.dto.CreateAccountDto;
 import app.budgetanalytics.api.dto.UpdateAccountDto;
 import app.budgetanalytics.api.entity.Account;
+import app.budgetanalytics.api.helper.VerifyOwnershipHelper;
 import app.budgetanalytics.api.mapper.AccountMapper;
 import app.budgetanalytics.api.repository.AccountRepository;
 import jakarta.transaction.Transactional;
@@ -16,9 +17,11 @@ import java.util.List;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final VerifyOwnershipHelper verifyOwnershipHelper;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, VerifyOwnershipHelper verifyOwnershipHelper) {
         this.accountRepository = accountRepository;
+        this.verifyOwnershipHelper = verifyOwnershipHelper;
     }
 
     public List<Account> findAccounts(String userId) {
@@ -34,24 +37,15 @@ public class AccountService {
     @Transactional
     public Account updateAccount(UpdateAccountDto dto, String userId) {
         // check user is writing on his own content
-        Account account = this.getOwnedAccountOrThrow(dto.getId(), userId);
+        Account account = this.verifyOwnershipHelper.getOwnedAccountOrThrow(dto.getId(), userId);
         AccountMapper.updateEntityValues(dto, account);
         return this.accountRepository.save(account);
     }
 
     @Transactional
     public void deleteAccount(String id, String userId) {
-        Account account = this.getOwnedAccountOrThrow(id, userId);
+        Account account = this.verifyOwnershipHelper.getOwnedAccountOrThrow(id, userId);
         this.accountRepository.deleteById(account.getId());
     }
 
-    private Account getOwnedAccountOrThrow(String id, String userId) {
-        Account account = this.accountRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
-
-        if (!account.getUserId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have access to this resource or it doesn't exist.");
-        }
-
-        return account;
-    }
 }
