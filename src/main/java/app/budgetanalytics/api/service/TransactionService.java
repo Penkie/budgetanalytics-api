@@ -31,4 +31,10 @@ public class TransactionService {
         return this.transactionRepository.save(transaction);
     }
 
+    @Transactional
+    public void deleteTransaction(String id, String userId) {
+        Transaction transaction = verifyOwnershipHelper.getOwnedTransactionOrThrow(id, userId);
+        this.transactionRepository.deleteById(transaction.getId());
+    }
+
 }

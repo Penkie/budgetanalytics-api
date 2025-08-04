@@ -2,8 +2,10 @@ package app.budgetanalytics.api.helper;
 
 import app.budgetanalytics.api.entity.Account;
 import app.budgetanalytics.api.entity.Category;
+import app.budgetanalytics.api.entity.Transaction;
 import app.budgetanalytics.api.repository.AccountRepository;
 import app.budgetanalytics.api.repository.CategoryRepository;
+import app.budgetanalytics.api.repository.TransactionRepository;
 import app.budgetanalytics.api.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -14,11 +16,12 @@ public class VerifyOwnershipHelper {
 
     private final AccountRepository accountRepository;
     private final CategoryRepository categoryRepository;
+    private final TransactionRepository transactionRepository;
 
-
-    public VerifyOwnershipHelper(AccountRepository accountRepository, CategoryRepository categoryRepository) {
+    public VerifyOwnershipHelper(AccountRepository accountRepository, CategoryRepository categoryRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
         this.categoryRepository = categoryRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public Category getOwnedCategoryOrThrow(String id, String userId) {
@@ -39,5 +42,15 @@ public class VerifyOwnershipHelper {
         }
 
         return account;
+    }
+
+    public Transaction getOwnedTransactionOrThrow(String id, String userId) {
+        Transaction transaction = this.transactionRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
+
+        if (!transaction.getUserId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have access to this resource or it doesn't exist.");
+        }
+
+        return transaction;
     }
 }

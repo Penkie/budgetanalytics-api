@@ -36,7 +36,6 @@ public class AccountService {
 
     @Transactional
     public Account updateAccount(UpdateAccountDto dto, String userId) {
-        // check user is writing on his own content
         Account account = this.verifyOwnershipHelper.getOwnedAccountOrThrow(dto.getId(), userId);
         AccountMapper.updateEntityValues(dto, account);
         return this.accountRepository.save(account);
