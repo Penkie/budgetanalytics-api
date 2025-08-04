@@ -1,7 +1,10 @@
 package app.budgetanalytics.api.controller;
 
 import app.budgetanalytics.api.dto.CreateTransactionDto;
+import app.budgetanalytics.api.dto.TransactionDto;
+import app.budgetanalytics.api.dto.UpdateTransactionDto;
 import app.budgetanalytics.api.entity.Transaction;
+import app.budgetanalytics.api.mapper.TransactionMapper;
 import app.budgetanalytics.api.service.TransactionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +24,20 @@ public class TransactionController {
     }
 
     @PostMapping()
-    public Transaction createTransaction(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateTransactionDto dto) {
-        return this.transactionService.createTransaction(dto, jwt.getSubject());
+    public TransactionDto createTransaction(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateTransactionDto dto) {
+        Transaction transaction = this.transactionService.createTransaction(dto, jwt.getSubject());
+        return TransactionMapper.toDto(transaction);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTransaction(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
         this.transactionService.deleteTransaction(id, jwt.getSubject());
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PutMapping()
+    public TransactionDto updateTransaction(@AuthenticationPrincipal Jwt jwt, @RequestBody UpdateTransactionDto dto) {
+        Transaction transaction = this.transactionService.updateTransaction(dto, jwt.getSubject());
+        return TransactionMapper.toDto(transaction);
     }
 }
