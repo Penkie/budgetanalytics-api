@@ -46,11 +46,12 @@ public class AccountService {
     }
 
     private Account getOwnedAccountOrThrow(String id, String userId) {
-        Account account = this.accountRepository.findById(id);
-        if (account != null && account.getUserId().equals(userId)) {
-            return account;
-        } else {
+        Account account = this.accountRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
+
+        if (!account.getUserId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have access to this resource or it doesn't exist.");
         }
+
+        return account;
     }
 }

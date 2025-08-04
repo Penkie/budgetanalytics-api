@@ -6,11 +6,7 @@ import org.springframework.lang.NonNull;
 
 import java.util.List;
 
-public interface AccountRepository extends CrudRepository<Account, Long> {
+public interface AccountRepository extends CrudRepository<Account, String> {
 
     List<Account> findAllByUserId(String userId);
-
-    Account findById(String id);
-
-    void deleteById(String id);
 }

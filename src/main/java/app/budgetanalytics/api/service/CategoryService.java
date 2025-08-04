@@ -46,11 +46,12 @@ public class CategoryService {
     }
 
     private Category getOwnedCategoryOrThrow(String id, String userId) {
-        Category category = this.categoryRepository.findById(id);
-        if (category != null && category.getUserId().equals(userId)) {
-            return category;
-        } else {
+        Category category = this.categoryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+
+        if (!category.getUserId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have access to this resource or it doesn't exist.");
         }
+
+        return category;
     }
 }
