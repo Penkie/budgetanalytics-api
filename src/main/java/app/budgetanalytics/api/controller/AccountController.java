@@ -2,6 +2,7 @@ package app.budgetanalytics.api.controller;
 
 import app.budgetanalytics.api.dto.AccountDto;
 import app.budgetanalytics.api.dto.CreateAccountDto;
+import app.budgetanalytics.api.dto.UpdateAccountDto;
 import app.budgetanalytics.api.entity.Account;
 import app.budgetanalytics.api.mapper.AccountMapper;
 import app.budgetanalytics.api.service.AccountService;
@@ -32,6 +33,12 @@ public class AccountController {
     @PostMapping()
     public AccountDto saveAccount(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateAccountDto dto) {
         Account account = this.accountService.save(dto, jwt.getSubject());
+        return AccountMapper.toDto(account);
+    }
+
+    @PutMapping()
+    public AccountDto updateAccount(@AuthenticationPrincipal Jwt jwt, @RequestBody UpdateAccountDto dto) {
+        Account account = this.accountService.updateAccount(dto, jwt.getSubject());
         return AccountMapper.toDto(account);
     }
 }
