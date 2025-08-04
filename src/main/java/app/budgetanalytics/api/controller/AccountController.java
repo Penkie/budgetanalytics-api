@@ -6,6 +6,8 @@ import app.budgetanalytics.api.dto.UpdateAccountDto;
 import app.budgetanalytics.api.entity.Account;
 import app.budgetanalytics.api.mapper.AccountMapper;
 import app.budgetanalytics.api.service.AccountService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -40,5 +42,11 @@ public class AccountController {
     public AccountDto updateAccount(@AuthenticationPrincipal Jwt jwt, @RequestBody UpdateAccountDto dto) {
         Account account = this.accountService.updateAccount(dto, jwt.getSubject());
         return AccountMapper.toDto(account);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
+        this.accountService.deleteAccount(id, jwt.getSubject());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

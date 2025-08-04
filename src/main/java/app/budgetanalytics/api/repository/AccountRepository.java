@@ -11,4 +11,6 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
     List<Account> findAllByUserId(String userId);
 
     Account findById(String id);
+
+    void deleteById(String id);
 }
